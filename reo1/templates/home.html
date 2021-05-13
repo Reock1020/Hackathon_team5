@@ -1,0 +1,86 @@
+<!doctype html>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+
+<head>
+    <title>Sample Bot</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" type="text/css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+  
+</head>
+
+<body>
+    <h1>何でもお悩み自動相談</h1>
+    <br>
+    <div class="container">
+ 
+        
+    <!-- 結果をここに表示する -->
+    <div class="chat-log">
+    </div>
+    <br>
+
+    <!-- 入力フォーム -->
+    <form action="{% url 'bot_response' %}" method="POST">
+        {% csrf_token %}
+        <input class = "input_text" placeholder="入力" type="text" name="input_text">
+        <input type="submit">
+    </form>
+
+    <script>
+        var $input = $('.input_text'); // inputタグ内のクラス名
+        var $chatlog = $('.chat-log'); // 結果を追加していくためのdivタグ内のクラス名
+
+        // ユーザーのログを追加する関数
+        function createRow_user(text) {
+            var $row = $('<p></p>');
+            $row.text(text);
+            $chatlog.append($row);
+        }
+
+        // ボットのログを追加する関数
+        function createRow_bot(text) {
+            var $row = $('<p></p><br>');
+            $row.text(text);
+            $chatlog.append($row);
+        }
+
+        // Ajax
+        $('form').submit(function(event) {
+            event.preventDefault();
+            var form = $(this);
+
+            // HTMLフォームの情報を設定する
+            $.ajax({
+                url: form.prop('action'), // 非同期通信するURL（/bot_response/）
+                type: form.prop('method'), // POST
+                data: form.serialize(), // データの情報
+                dataType: 'text', // データのタイプ
+            })
+
+
+            .done(function(statement) {
+                createRow_user('ユーザー => ' + $input.val()); // ユーザーのログを追加
+                createRow_bot(statement); // ボットのログを追加
+                $input.val(''); // input内の要素を空にする
+
+                $chatlog[0].scrollTop = $chatlog[0].scrollHeight;
+            })
+            // 送信に失敗した場合
+            .fail(function() {
+                window.alert('もう一度やり直してください'); 
+            });
+           
+        });
+    </script>
+    </div>
+</body>
+</html>
